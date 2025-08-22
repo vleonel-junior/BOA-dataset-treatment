@@ -1,0 +1,11 @@
+{
+  "name": "bankchurners___0",
+  "basename": "bankchurners",
+  "split": 0,
+  "task_type": "binclass",
+  "n_num_features": 14,
+  "n_cat_features": 5,
+  "train_size": 5151,
+  "val_size": 1717,
+  "test_size": 1717
+}

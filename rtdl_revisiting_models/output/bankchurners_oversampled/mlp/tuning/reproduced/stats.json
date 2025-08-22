@@ -1,0 +1,195 @@
+{
+    "config": {
+        "base_config": {
+            "data": {
+                "cat_policy": "indices",
+                "normalization": "quantile",
+                "path": "rtdl_revisiting_models/data/bankchurners_oversampled"
+            },
+            "model": {},
+            "seed": 0,
+            "training": {
+                "batch_size": 256,
+                "eval_batch_size": 8192,
+                "n_epochs": 200,
+                "optimizer": "adamw",
+                "patience": 16
+            }
+        },
+        "optimization": {
+            "options": {
+                "n_trials": 5
+            },
+            "sampler": {
+                "seed": 0
+            },
+            "space": {
+                "model": {
+                    "d_embedding": [
+                        "int",
+                        64,
+                        512
+                    ],
+                    "d_layers": [
+                        "$mlp_d_layers",
+                        1,
+                        8,
+                        1,
+                        512
+                    ],
+                    "dropout": [
+                        "?uniform",
+                        0.0,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "training": {
+                    "lr": [
+                        "loguniform",
+                        1e-05,
+                        0.01
+                    ],
+                    "weight_decay": [
+                        "?loguniform",
+                        0.0,
+                        1e-06,
+                        0.001
+                    ]
+                }
+            }
+        },
+        "program": "rtdl_revisiting_models/bin/mlp.py"
+    },
+    "environment": {},
+    "best_stats": {
+        "dataset": "bankchurners_oversampled",
+        "algorithm": "mlp",
+        "config": {
+            "data": {
+                "cat_policy": "indices",
+                "normalization": "quantile",
+                "path": "rtdl_revisiting_models/data/bankchurners_oversampled"
+            },
+            "model": {
+                "d_embedding": 91,
+                "d_layers": [
+                    344,
+                    108,
+                    108,
+                    108,
+                    108,
+                    67
+                ],
+                "dropout": 0.2850983852089398
+            },
+            "seed": 0,
+            "training": {
+                "batch_size": 256,
+                "eval_batch_size": 8192,
+                "lr": 0.00020692098656538343,
+                "n_epochs": 200,
+                "optimizer": "adamw",
+                "patience": 16,
+                "weight_decay": 0.0
+            }
+        },
+        "environment": {},
+        "epoch_size": 40,
+        "n_parameters": 243720,
+        "best_epoch": 31,
+        "metrics": {
+            "train": {
+                "0": {
+                    "precision": 0.9820081253627394,
+                    "recall": 0.9952941176470588,
+                    "f1-score": 0.9886064855390009,
+                    "support": 5100.0
+                },
+                "1": {
+                    "precision": 0.9952295766249255,
+                    "recall": 0.981764705882353,
+                    "f1-score": 0.9884512881255553,
+                    "support": 5100.0
+                },
+                "accuracy": 0.9885294117647059,
+                "macro avg": {
+                    "precision": 0.9886188509938325,
+                    "recall": 0.9885294117647059,
+                    "f1-score": 0.9885288868322781,
+                    "support": 10200.0
+                },
+                "weighted avg": {
+                    "precision": 0.9886188509938324,
+                    "recall": 0.9885294117647059,
+                    "f1-score": 0.988528886832278,
+                    "support": 10200.0
+                },
+                "roc_auc": 0.9994018838908113,
+                "score": 0.9885294117647059
+            },
+            "val": {
+                "0": {
+                    "precision": 0.9958183990442055,
+                    "recall": 0.9805882352941176,
+                    "f1-score": 0.98814463544754,
+                    "support": 1700.0
+                },
+                "1": {
+                    "precision": 0.23255813953488372,
+                    "recall": 0.5882352941176471,
+                    "f1-score": 0.3333333333333333,
+                    "support": 17.0
+                },
+                "accuracy": 0.976703552708212,
+                "macro avg": {
+                    "precision": 0.6141882692895446,
+                    "recall": 0.7844117647058824,
+                    "f1-score": 0.6607389843904367,
+                    "support": 1717.0
+                },
+                "weighted avg": {
+                    "precision": 0.988261366771836,
+                    "recall": 0.976703552708212,
+                    "f1-score": 0.9816613552285876,
+                    "support": 1717.0
+                },
+                "roc_auc": 0.8904152249134948,
+                "score": 0.976703552708212
+            },
+            "test": {
+                "0": {
+                    "precision": 0.9958133971291866,
+                    "recall": 0.9794117647058823,
+                    "f1-score": 0.9875444839857651,
+                    "support": 1700.0
+                },
+                "1": {
+                    "precision": 0.2222222222222222,
+                    "recall": 0.5882352941176471,
+                    "f1-score": 0.3225806451612903,
+                    "support": 17.0
+                },
+                "accuracy": 0.9755387303436226,
+                "macro avg": {
+                    "precision": 0.6090178096757044,
+                    "recall": 0.7838235294117647,
+                    "f1-score": 0.6550625645735277,
+                    "support": 1717.0
+                },
+                "weighted avg": {
+                    "precision": 0.9881540785657513,
+                    "recall": 0.9755387303436226,
+                    "f1-score": 0.9809606836013643,
+                    "support": 1717.0
+                },
+                "roc_auc": 0.9407612456747405,
+                "score": 0.9755387303436226
+            }
+        },
+        "time": "0:00:42",
+        "trial_id": 4,
+        "tuning_time": "0:06:29"
+    },
+    "time": "0:06:29"
+}

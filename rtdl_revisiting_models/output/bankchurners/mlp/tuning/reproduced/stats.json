@@ -1,0 +1,195 @@
+{
+    "config": {
+        "base_config": {
+            "data": {
+                "cat_policy": "indices",
+                "normalization": "quantile",
+                "path": "rtdl_revisiting_models/data/bankchurners"
+            },
+            "model": {},
+            "seed": 0,
+            "training": {
+                "batch_size": 256,
+                "eval_batch_size": 8192,
+                "n_epochs": 200,
+                "optimizer": "adamw",
+                "patience": 16
+            }
+        },
+        "optimization": {
+            "options": {
+                "n_trials": 5
+            },
+            "sampler": {
+                "seed": 0
+            },
+            "space": {
+                "model": {
+                    "d_embedding": [
+                        "int",
+                        64,
+                        512
+                    ],
+                    "d_layers": [
+                        "$mlp_d_layers",
+                        1,
+                        8,
+                        1,
+                        512
+                    ],
+                    "dropout": [
+                        "?uniform",
+                        0.0,
+                        0.0,
+                        0.5
+                    ]
+                },
+                "training": {
+                    "lr": [
+                        "loguniform",
+                        1e-05,
+                        0.01
+                    ],
+                    "weight_decay": [
+                        "?loguniform",
+                        0.0,
+                        1e-06,
+                        0.001
+                    ]
+                }
+            }
+        },
+        "program": "rtdl_revisiting_models/bin/mlp.py"
+    },
+    "environment": {},
+    "best_stats": {
+        "dataset": "bankchurners",
+        "algorithm": "mlp",
+        "config": {
+            "data": {
+                "cat_policy": "indices",
+                "normalization": "quantile",
+                "path": "rtdl_revisiting_models/data/bankchurners"
+            },
+            "model": {
+                "d_embedding": 310,
+                "d_layers": [
+                    309,
+                    279,
+                    279,
+                    279,
+                    279,
+                    217
+                ],
+                "dropout": 0.0
+            },
+            "seed": 0,
+            "training": {
+                "batch_size": 256,
+                "eval_batch_size": 8192,
+                "lr": 0.004734989304499477,
+                "n_epochs": 200,
+                "optimizer": "adamw",
+                "patience": 16,
+                "weight_decay": 0.0
+            }
+        },
+        "environment": {},
+        "epoch_size": 21,
+        "n_parameters": 872543,
+        "best_epoch": 26,
+        "metrics": {
+            "train": {
+                "0": {
+                    "precision": 0.9980419032700215,
+                    "recall": 0.9994117647058823,
+                    "f1-score": 0.9987263642598216,
+                    "support": 5100.0
+                },
+                "1": {
+                    "precision": 0.9318181818181818,
+                    "recall": 0.803921568627451,
+                    "f1-score": 0.8631578947368421,
+                    "support": 51.0
+                },
+                "accuracy": 0.9974762182100563,
+                "macro avg": {
+                    "precision": 0.9649300425441016,
+                    "recall": 0.9016666666666666,
+                    "f1-score": 0.9309421294983319,
+                    "support": 5151.0
+                },
+                "weighted avg": {
+                    "precision": 0.9973862228596072,
+                    "recall": 0.9974762182100563,
+                    "f1-score": 0.9973841021853366,
+                    "support": 5151.0
+                },
+                "roc_auc": 0.9988581314878893,
+                "score": 0.9974762182100563
+            },
+            "val": {
+                "0": {
+                    "precision": 0.9935634874195436,
+                    "recall": 0.9988235294117647,
+                    "f1-score": 0.996186564975066,
+                    "support": 1700.0
+                },
+                "1": {
+                    "precision": 0.75,
+                    "recall": 0.35294117647058826,
+                    "f1-score": 0.48,
+                    "support": 17.0
+                },
+                "accuracy": 0.9924286546301689,
+                "macro avg": {
+                    "precision": 0.8717817437097718,
+                    "recall": 0.6758823529411765,
+                    "f1-score": 0.738093282487533,
+                    "support": 1717.0
+                },
+                "weighted avg": {
+                    "precision": 0.9911519677421223,
+                    "recall": 0.9924286546301689,
+                    "f1-score": 0.9910758069060059,
+                    "support": 1717.0
+                },
+                "roc_auc": 0.8506574394463667,
+                "score": 0.9924286546301689
+            },
+            "test": {
+                "0": {
+                    "precision": 0.9912126537785588,
+                    "recall": 0.9952941176470588,
+                    "f1-score": 0.9932491928382742,
+                    "support": 1700.0
+                },
+                "1": {
+                    "precision": 0.2,
+                    "recall": 0.11764705882352941,
+                    "f1-score": 0.14814814814814814,
+                    "support": 17.0
+                },
+                "accuracy": 0.9866045428072219,
+                "macro avg": {
+                    "precision": 0.5956063268892794,
+                    "recall": 0.556470588235294,
+                    "f1-score": 0.5706986704932111,
+                    "support": 1717.0
+                },
+                "weighted avg": {
+                    "precision": 0.983378865127286,
+                    "recall": 0.9866045428072219,
+                    "f1-score": 0.9848818557621343,
+                    "support": 1717.0
+                },
+                "roc_auc": 0.9015570934256055,
+                "score": 0.9866045428072219
+            }
+        },
+        "time": "0:01:05",
+        "trial_id": 0,
+        "tuning_time": "0:01:14"
+    },
+    "time": "0:03:37"
+}
