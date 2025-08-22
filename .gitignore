@@ -1,7 +1,5 @@
 .DS_Store
 *.csv
-*.npy
-*.data
 *.arff
 *__pycache__
 *.ipynb_checkpoints
