@@ -4,6 +4,7 @@ Prépare et sauvegarde les fichiers N_*, C_*, y_* et info.json dans une structur
 rtdl_revisiting_models/data/<dataset>/* à partir de X, y numpy arrays, avec option d'oversampling.
 - Les variables catégoriques sont sauvegardées en valeurs brutes (strings) pour que build_X gère l'encodage.
 - Supporte un oversampler personnalisé ou MGSGRFOverSampler par défaut.
+
 Usage:
     from prepare_from_Xy import prepare_and_save_dataset
     prepare_and_save_dataset(X, y, numeric_features, categorical_features,
@@ -40,7 +41,7 @@ def prepare_and_save_dataset(
     y: np.ndarray,
     numeric_features: Sequence[int],
     categorical_features: Sequence[int],
-    out_dir: str = 'rtdl_revisiting_models/data/bankchurners',
+    out_dir: str = "rtdl_revisiting_models/data/bankchurners",
     test_size: float = 0.2,
     val_size: float = 0.2,
     random_state: int = 42,
@@ -49,9 +50,19 @@ def prepare_and_save_dataset(
 ) -> None:
     """
     Prépare les splits train/val/test et sauvegarde les fichiers pour rtdl_revisiting_models.
+    
     Args:
-        oversampler: Fonction ou objet callable (ex. MGSGRFOverSampler().fit_resample) pour oversampler train.
-                     Si None, pas d'oversampling.
+        X: Matrice des features (numpy array)
+        y: Vecteur des labels (numpy array)
+        numeric_features: Indices des features numériques
+        categorical_features: Indices des features catégoriques
+        out_dir: Répertoire de sortie
+        test_size: Proportion des données de test
+        val_size: Proportion des données de validation
+        random_state: Graine pour la reproductibilité
+        basename: Nom de base du dataset
+        oversampler: Fonction ou objet callable (ex. MGSGRFOverSampler().fit_resample) 
+                     pour oversampler train. Si None, pas d'oversampling.
     """
     # Vérifications initiales
     assert isinstance(X, np.ndarray) and isinstance(y, np.ndarray)
@@ -149,7 +160,7 @@ if __name__ == "__main__":
     y = np.random.randint(0, 2, 1000)  # Classification binaire
 
     # Cas sans oversampling
-    prepare_and_save_dataset(X, y, numeric_features, categorical_features, out_dir="rtdl_revisiting_models/data/bankchurners")
+    prepare_and_save_dataset(X, y, numeric_features, categorical_features, out_dir="rtdl_revisiting_models/data/bankchurners_example")
 
     # Cas avec oversampling
     def mgs_oversampler(X, y):
@@ -158,6 +169,6 @@ if __name__ == "__main__":
 
     prepare_and_save_dataset(
         X, y, numeric_features, categorical_features,
-        out_dir="rtdl_revisiting_models/data/bankchurners_oversampled",
+        out_dir="rtdl_revisiting_models/data/bankchurners_oversampled_example",
         oversampler=mgs_oversampler
     )
