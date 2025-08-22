@@ -124,9 +124,9 @@
                 "score": 0.9755387303436226
             }
         },
-        "time": "0:01:37",
+        "time": "0:01:16",
         "trial_id": 0,
-        "tuning_time": "0:01:50"
+        "tuning_time": "0:01:24"
     },
     {
         "dataset": "bankchurners_oversampled",
@@ -252,9 +252,9 @@
                 "score": 0.9662201514269074
             }
         },
-        "time": "0:00:52",
+        "time": "0:00:57",
         "trial_id": 1,
-        "tuning_time": "0:02:48"
+        "tuning_time": "0:02:29"
     },
     {
         "dataset": "bankchurners_oversampled",
@@ -379,9 +379,9 @@
                 "score": 0.9673849737914968
             }
         },
-        "time": "0:01:50",
+        "time": "0:01:49",
         "trial_id": 2,
-        "tuning_time": "0:04:44"
+        "tuning_time": "0:04:26"
     },
     {
         "dataset": "bankchurners_oversampled",
@@ -503,9 +503,9 @@
                 "score": 0.9603960396039604
             }
         },
-        "time": "0:00:51",
+        "time": "0:00:52",
         "trial_id": 3,
-        "tuning_time": "0:05:41"
+        "tuning_time": "0:05:25"
     },
     {
         "dataset": "bankchurners_oversampled",
@@ -632,8 +632,8 @@
                 "score": 0.9755387303436226
             }
         },
-        "time": "0:00:42",
+        "time": "0:00:44",
         "trial_id": 4,
-        "tuning_time": "0:06:29"
+        "tuning_time": "0:06:20"
     }
 ]
