@@ -246,24 +246,29 @@ def permutation_test_importance(model, X_num, X_cat, y, loss_fn):
 
 
 def load_test_data(dataset_name):
-    """Charge les données de test"""
+    """Charge les données du test set"""
     dataset_dir = Path(f"rtdl_revisiting_models/data/{dataset_name}")
-    
-    with open(dataset_dir / "info.json") as f:
-        info = json.load(f)
-    
-    if not (dataset_dir / "N_test.npy").exists():
-        raise FileNotFoundError(f"Numerical features file not found: {dataset_dir / 'N_test.npy'}")
-    X_num = torch.from_numpy(np.load(dataset_dir / "N_test.npy")).float()
-    
-    X_cat = None
-    if (dataset_dir / "C_test.npy").exists():
-        X_cat = torch.from_numpy(np.load(dataset_dir / "C_test.npy")).long()
-    
-    if not (dataset_dir / "y_test.npy").exists():
-        raise FileNotFoundError(f"Target file not found: {dataset_dir / 'y_test.npy'}")
-    y = torch.from_numpy(np.load(dataset_dir / "y_test.npy"))
-    
+    D = lib.Dataset.from_dir(dataset_dir)
+    info = D.info
+
+    result = D.build_X(
+        normalization=None,
+        num_nan_policy='mean',
+        cat_nan_policy='new',
+        cat_policy='indices',
+        cat_min_frequency=0.0,
+        seed=0,
+    )
+
+    if isinstance(result, tuple):
+        N_dict, C_dict = result
+    else:
+        N_dict, C_dict = result, None
+
+    X_num = torch.from_numpy(N_dict['test']).float() if N_dict is not None else None
+    X_cat = torch.from_numpy(C_dict['test']).long() if C_dict is not None else None
+    y = torch.from_numpy(D.y['test'])
+
     return X_num, X_cat, y, info
 
 
