@@ -369,9 +369,10 @@ def analyze_dataset(dataset_name, seeds=[0, 1, 2]):
     
     return all_correlations
 
+
 def main():
     """Analyse principale, sauvegarde les résultats dans un JSON"""
-    datasets = ['adult', 'california_housing', 'BOA_dataset']
+    datasets = ['adult', 'california_housing'] # On ajoutera plus tard 'BOA_dataset' quand il sera disponible
     seeds = [0, 1, 2]
     
     print("🔍 Feature Importance Analysis: FT-Transformer vs Sparse FTT+")
@@ -391,9 +392,10 @@ def main():
     print("SUMMARY TABLE - Rank Correlation (Mean ± Std)")
     print('='*80)
     
-    header = f"{'Model':<20}"
+    # Ajuster l'espacement dans le tableau
+    header = f"{'Model':<25}"  # Augmenter la largeur pour le nom du modèle
     for dataset in datasets:
-        header += f"{dataset.upper():>15}"
+        header += f"{dataset.upper():>20}"  # Augmenter l'espacement pour chaque dataset
     print(header)
     print("-" * len(header))
     
@@ -403,30 +405,39 @@ def main():
     }
     
     for model in ['ft_transformer', 'sparse_ftt_plus']:
-        row = f"{model:<20}"
+        row = f"{model:<25}"  # Ajuster l'espacement
         for dataset in datasets:
             if dataset in all_results and model in all_results[dataset]:
                 corrs = all_results[dataset][model]
                 if corrs:
                     mean_c = np.mean(corrs)
                     std_c = np.std(corrs)
-                    row += f"{mean_c:.2f} ({std_c:.2f}):>15"
-                    # Ajouter au dictionnaire JSON
+                    row += f"{mean_c:.2f} ({std_c:.2f}):>20"  # Ajuster l'espacement
                     if dataset not in json_results["datasets"]:
                         json_results["datasets"][dataset] = {}
                     json_results["datasets"][dataset][model] = {
-                        "correlations": corrs,
+                        "correlations": [float(c) for c in corrs],  # Convertir en float pour JSON
                         "mean": float(mean_c),
                         "std": float(std_c)
                     }
                 else:
-                    row += f"{'N/A':>15}"
-                    json_results["datasets"][dataset][model] = {"correlations": [], "mean": None, "std": None}
+                    row += f"{'N/A':>20}"
+                    if dataset not in json_results["datasets"]:
+                        json_results["datasets"][dataset] = {}
+                    json_results["datasets"][dataset][model] = {
+                        "correlations": [],
+                        "mean": None,
+                        "std": None
+                    }
             else:
-                row += f"{'N/A':>15}"
+                row += f"{'N/A':>20}"
                 if dataset not in json_results["datasets"]:
                     json_results["datasets"][dataset] = {}
-                json_results["datasets"][dataset][model] = {"correlations": [], "mean": None, "std": None}
+                json_results["datasets"][dataset][model] = {
+                    "correlations": [],
+                    "mean": None,
+                    "std": None
+                }
         print(row)
     
     # Sauvegarder les résultats dans un fichier JSON
