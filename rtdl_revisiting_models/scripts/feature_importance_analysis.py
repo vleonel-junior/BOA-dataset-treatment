@@ -11,8 +11,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from scipy.stats import spearmanr
-import pandas as pd
-from typing import List, Dict, Tuple, Optional
 import json
 from tqdm import tqdm
 
@@ -23,7 +21,7 @@ class AttentionMapExtractor:
     """Extracteur d'importance basé sur les cartes d'attention"""
     
     def __init__(self):
-        self.attention_maps: List[torch.Tensor] = []
+        self.attention_maps: ty.List[torch.Tensor] = []
         
     def __call__(self, module, input, output):
         """Hook pour capturer les cartes d'attention"""
@@ -40,7 +38,7 @@ class SparseAttentionExtractor:
     """Extracteur pour Sparse FTT+ avec attention interprétable"""
     
     def __init__(self):
-        self.attention_maps: List[torch.Tensor] = []
+        self.attention_maps: ty.List[torch.Tensor] = []
         
     def __call__(self, module, input, output):
         """Hook spécialisé pour InterpretableMultiHeadAttention"""
@@ -92,7 +90,7 @@ def extract_ft_transformer_importance(model, X_num, X_cat):
     
     model.eval()
     with torch.no_grad():
-        batch_size = 64
+        batch_size = 128  # Augmenté pour meilleures performances
         n_samples = X_num.shape[0] if X_num is not None else X_cat.shape[0]
         
         for i in range(0, n_samples, batch_size):
@@ -176,7 +174,7 @@ def extract_sparse_ftt_importance(model, X_num, X_cat):
     
     model.eval()
     with torch.no_grad():
-        batch_size = 64
+        batch_size = 128  # Augmenté pour meilleures performances
         n_samples = X_num.shape[0] if X_num is not None else X_cat.shape[0]
         
         for i in range(0, n_samples, batch_size):
@@ -245,19 +243,19 @@ def permutation_test_importance(model, X_num, X_cat, y, loss_fn):
     return importance_scores
 
 
-def load_test_data(dataset_name):
-    """Charge les données du test set"""
+def load_test_data(dataset_name, seed, normalization=None):
+    """Charge les données du test set avec une graine et normalisation spécifiques"""
     dataset_dir = Path(f"rtdl_revisiting_models/data/{dataset_name}")
     D = lib.Dataset.from_dir(dataset_dir)
     info = D.info
 
     result = D.build_X(
-        normalization=None,
+        normalization=normalization,
         num_nan_policy='mean',
         cat_nan_policy='new',
         cat_policy='indices',
         cat_min_frequency=0.0,
-        seed=0,
+        seed=seed,
     )
 
     if isinstance(result, tuple):
@@ -267,22 +265,29 @@ def load_test_data(dataset_name):
 
     X_num = torch.from_numpy(N_dict['test']).float() if N_dict is not None else None
     X_cat = torch.from_numpy(C_dict['test']).long() if C_dict is not None else None
-    y = torch.from_numpy(D.y['test'])
+    y = torch.from_numpy(D.y['test']).float() if info['task_type'] != 'multiclass' else torch.from_numpy(D.y['test']).long()
 
     return X_num, X_cat, y, info
 
 
 def load_trained_model(model_name, dataset_name, seed):
-    """Charge un modèle entraîné depuis checkpoint"""
+    """Charge un modèle entraîné depuis checkpoint et les données de test correspondantes"""
     checkpoint_path = Path(f"rtdl_revisiting_models/output/{dataset_name}/{model_name}/default/checkpoint.pt")
     config_path = Path(f"rtdl_revisiting_models/output/{dataset_name}/{model_name}/default/{seed}.toml")
     
+    if not config_path.exists():
+        raise FileNotFoundError(f"Config not found: {config_path}")
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
     
     args, _ = lib.load_config(config_path)
     
-    X_num, X_cat, y, info = load_test_data(dataset_name)
+    # Charger les données avec la même graine et normalisation que l'entraînement
+    X_num, X_cat, y, info = load_test_data(
+        dataset_name,
+        seed=args.get('seed', seed),
+        normalization=args['data'].get('normalization')
+    )
     
     if model_name == 'ft_transformer':
         from rtdl_revisiting_models.bin.ft_transformer import Transformer
@@ -304,7 +309,7 @@ def load_trained_model(model_name, dataset_name, seed):
     model.eval()
     model.to(device)
     
-    return model, info
+    return model, info, X_num, X_cat, y
 
 
 def analyze_dataset(dataset_name, seeds=[0, 1, 2]):
@@ -313,36 +318,31 @@ def analyze_dataset(dataset_name, seeds=[0, 1, 2]):
     print(f"Analyzing dataset: {dataset_name.upper()}")
     print('='*60)
     
-    X_num_test, X_cat_test, y_test, info = load_test_data(dataset_name)
-    device = lib.get_device()
-    
-    if X_num_test is not None:
-        X_num_test = X_num_test.to(device)
-    if X_cat_test is not None:
-        X_cat_test = X_cat_test.to(device)
-    y_test = y_test.to(device)
-    if info['task_type'] != 'multiclass':
-        y_test = y_test.float()
-    
-    if info['task_type'] == 'binclass':
-        loss_fn = F.binary_cross_entropy_with_logits
-    elif info['task_type'] == 'multiclass':
-        loss_fn = F.cross_entropy
-    else:
-        loss_fn = F.mse_loss
-    
     models = ['ft_transformer', 'sparse_ftt_plus']
     all_correlations = {model: [] for model in models}
     
     for seed in seeds:
         print(f"\nSeed {seed}:")
-        seed_correlations = {}
         
         for model_name in models:
             print(f"  Processing {model_name}...")
             
             try:
-                model, _ = load_trained_model(model_name, dataset_name, seed)
+                model, info, X_num_test, X_cat_test, y_test = load_trained_model(model_name, dataset_name, seed)
+                
+                device = lib.get_device()
+                if X_num_test is not None:
+                    X_num_test = X_num_test.to(device)
+                if X_cat_test is not None:
+                    X_cat_test = X_cat_test.to(device)
+                y_test = y_test.to(device)
+                
+                if info['task_type'] == 'binclass':
+                    loss_fn = F.binary_cross_entropy_with_logits
+                elif info['task_type'] == 'multiclass':
+                    loss_fn = F.cross_entropy
+                else:
+                    loss_fn = F.mse_loss
                 
                 if model_name == 'ft_transformer':
                     attention_importance = extract_ft_transformer_importance(model, X_num_test, X_cat_test)
@@ -356,7 +356,6 @@ def analyze_dataset(dataset_name, seeds=[0, 1, 2]):
                 correlation, _ = spearmanr(attention_importance, perm_importance)
                 
                 print(f"    Rank correlation: {correlation:.3f}")
-                seed_correlations[model_name] = correlation
                 all_correlations[model_name].append(correlation)
                 
             except Exception as e:
@@ -377,7 +376,7 @@ def analyze_dataset(dataset_name, seeds=[0, 1, 2]):
 
 def main():
     """Analyse principale, sauvegarde les résultats dans un JSON"""
-    datasets = ['adult', 'california_housing'] # On ajoutera plus tard 'BOA_dataset' quand il sera disponible
+    datasets = ['adult', 'california_housing']  # BOA_dataset sera ajouté plus tard
     seeds = [0, 1, 2]
     
     print("🔍 Feature Importance Analysis: FT-Transformer vs Sparse FTT+")
@@ -397,31 +396,27 @@ def main():
     print("SUMMARY TABLE - Rank Correlation (Mean ± Std)")
     print('='*80)
     
-    # Ajuster l'espacement dans le tableau
-    header = f"{'Model':<25}"  # Augmenter la largeur pour le nom du modèle
+    header = f"{'Model':<25}"
     for dataset in datasets:
-        header += f"{dataset.upper():>20}"  # Augmenter l'espacement pour chaque dataset
+        header += f"{dataset.upper():>20}"
     print(header)
     print("-" * len(header))
     
-    # Préparer les résultats pour JSON
-    json_results = {
-        "datasets": {}
-    }
+    json_results = {"datasets": {}}
     
     for model in ['ft_transformer', 'sparse_ftt_plus']:
-        row = f"{model:<25}"  # Ajuster l'espacement
+        row = f"{model:<25}"
         for dataset in datasets:
             if dataset in all_results and model in all_results[dataset]:
                 corrs = all_results[dataset][model]
                 if corrs:
                     mean_c = np.mean(corrs)
                     std_c = np.std(corrs)
-                    row += f"{mean_c:.2f} ({std_c:.2f}):>20"  # Ajuster l'espacement
+                    row += f"{mean_c:.2f} ({std_c:.2f}):>20"
                     if dataset not in json_results["datasets"]:
                         json_results["datasets"][dataset] = {}
                     json_results["datasets"][dataset][model] = {
-                        "correlations": [float(c) for c in corrs],  # Convertir en float pour JSON
+                        "correlations": [float(c) for c in corrs],
                         "mean": float(mean_c),
                         "std": float(std_c)
                     }
@@ -445,13 +440,13 @@ def main():
                 }
         print(row)
     
-    # Sauvegarder les résultats dans un fichier JSON
     output_dir = Path("results")
     output_dir.mkdir(exist_ok=True)
     output_path = output_dir / "feature_importance_results.json"
     with open(output_path, "w") as f:
         json.dump(json_results, f, indent=4)
     print(f"\nResults saved to {output_path}")
+
 
 if __name__ == "__main__":
     main()
