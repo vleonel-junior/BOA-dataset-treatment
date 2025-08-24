@@ -51,7 +51,7 @@ class SparseAttentionExtractor:
 
 
 def extract_ft_transformer_importance(model, X_num, X_cat):
-    """Extrait l'importance pour FT-Transformer (méthode des auteurs)"""
+    """Extrait l'importance pour FT-Transformer (méthode employée par Gorishiny et al. dans Revisiting Deep Learning Models for Tabular Data)"""
     hook = AttentionMapExtractor()
     hooks = []
     
@@ -205,7 +205,7 @@ def extract_sparse_ftt_importance(model, X_num, X_cat):
 
 
 def permutation_test_importance(model, X_num, X_cat, y, loss_fn):
-    """Test de permutation pour importance des caractéristiques, sans limitation d'échantillons"""
+    """Test de permutation pour importance des caractéristiques"""
     device = next(model.parameters()).device
     
     model.eval()
@@ -244,7 +244,7 @@ def permutation_test_importance(model, X_num, X_cat, y, loss_fn):
 
 
 def load_test_data(dataset_name, seed, normalization=None):
-    """Charge les données du test set avec une graine et normalisation spécifiques"""
+    """Charge les données du test set"""
     dataset_dir = Path(f"rtdl_revisiting_models/data/{dataset_name}")
     D = lib.Dataset.from_dir(dataset_dir)
     info = D.info
