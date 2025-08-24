@@ -90,7 +90,7 @@ def extract_ft_transformer_importance(model, X_num, X_cat):
     
     model.eval()
     with torch.no_grad():
-        batch_size = 128  # Augmenté pour meilleures performances
+        batch_size = 128
         n_samples = X_num.shape[0] if X_num is not None else X_cat.shape[0]
         
         for i in range(0, n_samples, batch_size):
@@ -174,7 +174,7 @@ def extract_sparse_ftt_importance(model, X_num, X_cat):
     
     model.eval()
     with torch.no_grad():
-        batch_size = 128  # Augmenté pour meilleures performances
+        batch_size = 128
         n_samples = X_num.shape[0] if X_num is not None else X_cat.shape[0]
         
         for i in range(0, n_samples, batch_size):
